@@ -10,6 +10,12 @@ public interface ITemperatureService {
 
 	public Long deleteTempById(Long id);
 
+	public Temperature insertTempData(Temperature temperature);
+
 	public void storedTemp(Temperature temperature);
+	
+	public Temperature updateTemperature(Temperature temperature);
+	
+	
 
 }

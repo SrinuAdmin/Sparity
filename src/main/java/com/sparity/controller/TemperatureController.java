@@ -8,6 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
@@ -30,6 +33,44 @@ public class TemperatureController {
 	@Autowired
 	private ITemperatureService service;
 
+	/**
+	 * 
+	 * It will take temperature as request body and stores in db via service class
+	 * 
+	 * @param temperature
+	 * @return
+	 */
+	@PostMapping("/insert")
+	public ResponseEntity<?> insertTemperature(@RequestBody Temperature temperature) {
+		try {
+			temperature = service.insertTempData(temperature);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.internalServerError().body("Error while saving data");
+		}
+		return ResponseEntity.ok(temperature);
+	}
+
+	/**
+	 * updates the temperature object
+	 * @param temperature
+	 * @return
+	 */
+	@PutMapping("/update")
+	public ResponseEntity<?> updateTemperature(@RequestBody Temperature temperature) {
+		try {
+			temperature = service.updateTemperature(temperature);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.internalServerError().body("Invalid input , Unable to update data");
+		}
+		return ResponseEntity.ok(temperature);
+	}
+
+	/**
+	 * gathers all temps vailable in db
+	 * @return
+	 */
 	@GetMapping("/all")
 	public ResponseEntity<?> getData() {
 		List<Temperature> allStoredTemps = null;
@@ -40,20 +81,35 @@ public class TemperatureController {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			return ResponseEntity.internalServerError().body("Error while fetching data");
+
 		}
 		return ResponseEntity.ok(allStoredTemps);
 	}
 
+	/**
+	 * deletes one node based on id
+	 * @param id
+	 * @return
+	 */
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<String> deleteTemperature(@PathVariable Long id) {
 		try {
 			service.deleteTempById(id);
 		} catch (Exception e) {
 			e.printStackTrace();
+			return ResponseEntity.internalServerError().body("Invalid input , Unable to delete data");
+
 		}
 		return ResponseEntity.ok("Temperature details with id " + id + " deleted. ");
 	}
 
+	/**
+	 * gets the temparature of the location
+	 * @apiNote location should be geographical location
+	 * @param location
+	 * @return
+	 */
 	@GetMapping("/temperature/{location}")
 	public ResponseEntity<String> temperature(@PathVariable String location) {
 
@@ -74,7 +130,7 @@ public class TemperatureController {
 			JsonObject convertedToJson = gson.fromJson(responseBody, JsonObject.class);
 			JsonObject getMainData = convertedToJson.get("main").getAsJsonObject();
 			getTemperature = getMainData.get("temp").getAsFloat();
-			
+
 			// create temperature obj
 			Temperature temperature = new Temperature();
 			temperature.setCityName(location);
@@ -85,6 +141,8 @@ public class TemperatureController {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			return ResponseEntity.internalServerError().body("Error while getting temperature");
+
 		}
 
 		return ResponseEntity.ok(location + " temperature is " + getTemperature);
