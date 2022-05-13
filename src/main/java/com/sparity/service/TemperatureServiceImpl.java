@@ -1,6 +1,7 @@
 package com.sparity.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,7 +56,14 @@ public class TemperatureServiceImpl implements ITemperatureService {
 
 	@Override
 	public void storedTemp(Temperature temperature) {
-		repo.save(temperature);
+		Temperature existingTemperature = repo.findByCityName(temperature.getCityName());
+		if (existingTemperature != null) {
+			existingTemperature.setTemperature(temperature.getTemperature());
+			repo.save(existingTemperature);
+		} else {
+			repo.save(temperature);
+		}
+
 	}
 
 }

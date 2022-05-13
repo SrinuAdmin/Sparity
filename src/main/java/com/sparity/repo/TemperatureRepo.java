@@ -6,4 +6,5 @@ import com.sparity.entity.Temperature;
 
 public interface TemperatureRepo extends Neo4jRepository<Temperature, Long> {
 
+	Temperature findByCityName(String cityName);
 }
